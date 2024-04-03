@@ -78,8 +78,15 @@ WHISPER_DEFAULT_SETTINGS = {
 UPLOAD_DIR="/tmp"
 # -----
 
+def verify_token(http_authorization_credentials: HTTPAuthorizationCredentials = Security(security)):
+    token = http_authorization_credentials.credentials
+    if token != "cJYSqiH7Xg1moDuXiUeRcG9ygTdtPbV9T6YjQqMRh5IIvgXIklvKdP9ZRimbZ7Cl":
+        raise HTTPException(status_code=403, detail="Invalid token")
+    return token
+
 @app.post('/v1/audio/transcriptions')
-async def transcriptions(model: str = Form(...),
+async def transcriptions(token: str = Depends(verify_token),
+                         model: str = Form(...),
                          file: UploadFile = File(...),
                          response_format: Optional[str] = Form(None),
                          prompt: Optional[str] = Form(None),
